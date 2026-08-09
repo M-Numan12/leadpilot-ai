@@ -14,6 +14,11 @@ from app.security.authentication import (
 )
 from app.api.dependencies import get_current_user
 
+from app.services.email_service import (
+    send_registration_welcome_email,
+    send_login_security_email
+)
+
 router = APIRouter()
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -54,6 +59,12 @@ async def register(
     db.add(new_membership)
     await db.commit()
     await db.refresh(new_user)
+
+    # Dispatch Registration Confirmation Email
+    try:
+        send_registration_welcome_email(new_user.email, new_user.full_name)
+    except Exception as e:
+        print(f"Registration email warning: {e}")
     
     # Access Token
     token = create_access_token({"sub": new_user.id, "email": new_user.email})
@@ -84,12 +95,19 @@ async def login(
             detail="User account is inactive"
         )
         
+    # Dispatch Security Login Alert Email
+    try:
+        send_login_security_email(user.email, user.full_name)
+    except Exception as e:
+        print(f"Login email warning: {e}")
+
     token = create_access_token({"sub": user.id, "email": user.email})
     return TokenResponse(
         access_token=token,
         token_type="bearer",
         user=UserResponse.model_validate(user)
     )
+
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
