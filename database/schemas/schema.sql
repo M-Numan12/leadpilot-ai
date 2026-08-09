@@ -1,0 +1,1 @@
+-- SQL Database Baseline Schema Definition

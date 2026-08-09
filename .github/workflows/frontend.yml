@@ -1,0 +1,19 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ main, structure-creating ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: cd frontend && npm ci
+      - run: cd frontend && npm run build
