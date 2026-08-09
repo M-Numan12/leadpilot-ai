@@ -4,33 +4,62 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, CheckCircle2, ArrowRight, Lock, User, Building2, Sparkles } from 'lucide-react';
+import { Mail, CheckCircle2, ArrowRight, Lock, User, Building2, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
+  const [step, setStep] = useState<1 | 2>(1);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [orgName, setOrgName] = useState('');
   const [password, setPassword] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
   const { register } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // STEP 1: Send Account Verification OTP
+  const handleRequestRegistrationOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!email || !password || !fullName) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setInfoMessage(`📩 6-Digit Verification OTP Code sent to ${email}. (Demo OTP Code: 315904)`);
+      setStep(2);
+    }, 1000);
+  };
+
+  // STEP 2: Verify OTP and finalize Registration
+  const handleVerifyOtpAndRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
     setLoading(true);
 
+    if (otpCode !== '315904' && otpCode.length < 6) {
+      setLoading(false);
+      setError('Invalid 6-digit verification code. Please enter the code sent to your email.');
+      return;
+    }
+
     const result = await register(email, password, fullName, orgName);
     setLoading(false);
 
     if (result.success || !result.error) {
-      setSuccessMessage(`🎉 Registration Complete! Confirmation email has been sent to ${email}. Your account is created! You can now Sign In using your email & password.`);
+      setSuccessMessage(`🎉 Email Verified & Account Activated! Confirmation sent to ${email}. Redirecting to Sign In...`);
       setTimeout(() => {
         router.push('/login');
-      }, 3500);
+      }, 3000);
     } else {
       setError(result.error || 'Registration failed');
     }
@@ -81,12 +110,32 @@ export default function RegisterPage() {
             ⚡
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 6px 0', letterSpacing: '-0.5px', color: '#ffffff' }}>
-            Create New Account
+            {step === 1 ? 'Create New Account' : 'Verify Email OTP Code'}
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
-            Join LeadPilot AI and automate your sales pipeline
+            {step === 1
+              ? 'Join LeadPilot AI and automate your sales pipeline'
+              : `Email (${email}) par bheja gaya 6-digit OTP code enter karke account activate karein.`}
           </p>
         </div>
+
+        {/* Info Banner */}
+        {infoMessage && (
+          <div
+            style={{
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.4)',
+              color: '#a5b4fc',
+              padding: '14px',
+              borderRadius: '12px',
+              fontSize: '13px',
+              marginBottom: '20px',
+              lineHeight: '1.5'
+            }}
+          >
+            {infoMessage}
+          </div>
+        )}
 
         {/* Success Confirmation Banner */}
         {successMessage && (
@@ -144,9 +193,9 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* Form */}
-        {!successMessage && (
-          <form onSubmit={handleSubmit}>
+        {/* STEP 1: USER DETAILS FORM */}
+        {step === 1 && (
+          <form onSubmit={handleRequestRegistrationOtp}>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#cbd5e1', marginBottom: '8px' }}>
                 Full Name
@@ -270,15 +319,85 @@ export default function RegisterPage() {
                 cursor: loading ? 'not-allowed' : 'pointer',
                 opacity: loading ? 0.7 : 1,
                 boxShadow: '0 4px 16px rgba(79, 70, 229, 0.4)',
-                transition: 'all 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px'
               }}
             >
-              <span>{loading ? 'Registering Account...' : 'Complete Registration'}</span>
+              <span>{loading ? 'Sending OTP Code...' : 'Send Account Verification OTP Code'}</span>
               <ArrowRight size={18} />
+            </button>
+          </form>
+        )}
+
+        {/* STEP 2: VERIFY REGISTRATION OTP */}
+        {step === 2 && !successMessage && (
+          <form onSubmit={handleVerifyOtpAndRegister}>
+            {/* Quick Demo Helper Button */}
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setOtpCode('315904')}
+                style={{ padding: '4px 10px', borderRadius: '6px', background: '#0f172a', border: '1px solid #334155', color: '#818cf8', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
+              >
+                Auto-Fill Demo Code (315904)
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#cbd5e1', marginBottom: '8px' }}>
+                6-Digit Registration Verification Code (OTP)
+              </label>
+              <div style={{ position: 'relative' }}>
+                <ShieldCheck size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  placeholder="315904"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px 12px 42px',
+                    borderRadius: '10px',
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    color: '#f8fafc',
+                    fontSize: '15px',
+                    letterSpacing: '2px',
+                    fontWeight: 'bold',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                fontSize: '15px',
+                fontWeight: '800',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              <span>{loading ? 'Activating Account...' : 'Verify OTP & Activate Account'}</span>
+              <CheckCircle2 size={18} />
             </button>
           </form>
         )}

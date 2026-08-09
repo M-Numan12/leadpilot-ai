@@ -7,10 +7,19 @@ class RegisterRequest(BaseModel):
     password: str
     full_name: Optional[str] = None
     organization_name: Optional[str] = None
+    otp_code: Optional[str] = None
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class VerifyResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp_code: str
+    new_password: str
 
 class UserResponse(BaseModel):
     id: str
@@ -25,8 +34,8 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
