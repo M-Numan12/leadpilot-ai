@@ -1,0 +1,12 @@
+{
+  "name": "leadpilot-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "dev": "cd client && npm run dev"
+  },
+  "dependencies": {
+    "next": "14.2.35"
+  }
+}
