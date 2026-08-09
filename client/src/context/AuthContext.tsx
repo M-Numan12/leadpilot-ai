@@ -9,7 +9,10 @@ interface User {
   full_name?: string;
   is_active: boolean;
   is_superuser: boolean;
+  is_unlimited_credits?: boolean;
+  ai_credits?: string;
 }
+
 
 interface AuthContextType {
   user: User | null;

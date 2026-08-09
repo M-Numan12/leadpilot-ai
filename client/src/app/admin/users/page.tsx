@@ -102,6 +102,7 @@ export default function UserManagementPage() {
             <tr>
               <th className="px-6 py-4">User</th>
               <th className="px-6 py-4">Role</th>
+              <th className="px-6 py-4">AI Credits</th>
               <th className="px-6 py-4">Superuser</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Joined Date</th>
@@ -127,6 +128,12 @@ export default function UserManagementPage() {
                 <td className="px-6 py-4 font-medium text-slate-200">
                   {user.role}
                 </td>
+                <td className="px-6 py-4">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    ⚡ UNLIMITED
+                  </span>
+                </td>
+
                 <td className="px-6 py-4">
                   {user.is_superuser ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">

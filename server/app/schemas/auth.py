@@ -18,10 +18,13 @@ class UserResponse(BaseModel):
     full_name: Optional[str] = None
     is_active: bool
     is_superuser: bool
+    is_unlimited_credits: bool = True
+    ai_credits: str = "UNLIMITED"
     created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
 
 class TokenResponse(BaseModel):
     access_token: str

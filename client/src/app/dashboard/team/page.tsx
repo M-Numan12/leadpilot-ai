@@ -37,9 +37,11 @@ interface Employee {
   title: string;
   role: 'Manager' | 'Sales Rep' | 'Research Analyst';
   status: 'Active' | 'Invited' | 'Suspended';
+  unlimitedCredits: boolean;
   permissions: EmployeePermission;
   joined: string;
 }
+
 
 export default function TeamManagementPage() {
   const [employees, setEmployees] = useState<Employee[]>([
@@ -50,6 +52,7 @@ export default function TeamManagementPage() {
       title: 'Senior Sales Manager',
       role: 'Manager',
       status: 'Active',
+      unlimitedCredits: true,
       permissions: { crm: true, ai_agent: true, campaigns: true, proposals: true, settings: true },
       joined: '2026-01-15'
     },
@@ -60,6 +63,7 @@ export default function TeamManagementPage() {
       title: 'Outbound BDR Lead',
       role: 'Sales Rep',
       status: 'Active',
+      unlimitedCredits: true,
       permissions: { crm: true, ai_agent: true, campaigns: true, proposals: false, settings: false },
       joined: '2026-02-01'
     },
@@ -70,6 +74,7 @@ export default function TeamManagementPage() {
       title: 'Prospecting Analyst',
       role: 'Research Analyst',
       status: 'Active',
+      unlimitedCredits: true,
       permissions: { crm: false, ai_agent: true, campaigns: false, proposals: false, settings: false },
       joined: '2026-03-10'
     },
@@ -80,6 +85,7 @@ export default function TeamManagementPage() {
       title: 'Account Executive',
       role: 'Sales Rep',
       status: 'Invited',
+      unlimitedCredits: true,
       permissions: { crm: true, ai_agent: false, campaigns: true, proposals: true, settings: false },
       joined: '2026-04-05'
     }
@@ -91,6 +97,7 @@ export default function TeamManagementPage() {
   const [newEmpEmail, setNewEmpEmail] = useState('');
   const [newEmpTitle, setNewEmpTitle] = useState('');
   const [newEmpRole, setNewEmpRole] = useState<'Manager' | 'Sales Rep' | 'Research Analyst'>('Sales Rep');
+  const [newEmpUnlimited, setNewEmpUnlimited] = useState<boolean>(true);
   const [newEmpPerms, setNewEmpPerms] = useState<EmployeePermission>({
     crm: true,
     ai_agent: true,
@@ -129,12 +136,14 @@ export default function TeamManagementPage() {
       title: newEmpTitle || 'Sales Representative',
       role: newEmpRole,
       status: 'Active',
+      unlimitedCredits: newEmpUnlimited,
       permissions: { ...newEmpPerms },
       joined: new Date().toISOString().split('T')[0]
     };
 
     setEmployees(prev => [newEmp, ...prev]);
     setIsModalOpen(false);
+
 
     // Reset Form
     setNewEmpName('');
@@ -216,6 +225,7 @@ export default function TeamManagementPage() {
             <tr style={{ background: '#0f172a', borderBottom: '1px solid #334155', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>
               <th style={{ padding: '16px 20px' }}>Employee</th>
               <th style={{ padding: '16px 20px' }}>Role & Title</th>
+              <th style={{ padding: '16px 20px' }}>AI Credits</th>
               <th style={{ padding: '16px 20px' }}>Status</th>
               <th style={{ padding: '16px 20px', textAlign: 'center' }}>CRM Access</th>
               <th style={{ padding: '16px 20px', textAlign: 'center' }}>AI Agent</th>
@@ -250,6 +260,14 @@ export default function TeamManagementPage() {
                     {emp.role}
                   </span>
                 </td>
+
+                {/* AI Credits */}
+                <td style={{ padding: '16px 20px' }}>
+                  <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(245, 158, 11, 0.15)', color: '#fcd34d', fontSize: '11px', fontWeight: '800', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    ⚡ UNLIMITED
+                  </span>
+                </td>
+
 
                 {/* Status */}
                 <td style={{ padding: '16px 20px' }}>
