@@ -2,113 +2,175 @@
 
 **LeadPilot AI** is an advanced AI-powered client acquisition and sales automation platform designed to help freelancers, agencies, startups, and businesses discover potential clients, research companies, qualify leads, generate personalized proposals, manage conversations, and organize follow-ups from one intelligent workspace.
 
-The platform combines **AI agents, web research, automation, CRM, communication tools, and business intelligence** into a single system.
+---
 
-## What LeadPilot AI Does
-
-LeadPilot AI helps automate the client acquisition workflow:
-
-**Discover → Research → Analyze → Qualify → Personalize → Approve → Outreach → Follow Up → Convert**
-
-### Core Capabilities
-
-* 🔎 **Lead Discovery** — Find relevant businesses and potential customers from permitted data sources.
-* 🏢 **Company Intelligence** — Analyze a company's website, services, industry, technology, and potential business needs.
-* 🧠 **AI Lead Qualification** — Score and prioritize leads based on the user's services and ideal-client profile.
-* ✍️ **Proposal Generation** — Create personalized proposals and outreach messages based on each prospect's actual business context.
-* 💬 **Conversation Assistant** — Help generate professional responses to client questions and conversations.
-* 📧 **Outreach Management** — Organize approved communication campaigns and track their progress.
-* 🔄 **Follow-Up Automation** — Track follow-ups and recommend the next action for each prospect.
-* 📊 **CRM** — Store leads, companies, contacts, conversations, proposals, tasks, and deal status.
-* 📈 **Analytics** — Monitor leads, responses, meetings, conversions, campaigns, and revenue.
-* 🤖 **Multi-Agent AI** — Use specialized AI agents for research, analysis, qualification, proposals, CRM, and follow-up.
-* 🔐 **Secure Integrations** — Connect supported services using secure authentication and appropriate permissions.
-
-## AI Agent Architecture
-
-LeadPilot AI uses a modular multi-agent architecture.
+## 🏗️ System Actual Flow
 
 ```text
-                    LeadPilot AI
-                         │
-                         ▼
-                  Manager Agent
-                         │
-                    Planner Agent
-                         │
-        ┌────────────────┼────────────────┐
-        ▼                ▼                ▼
- Research Agent   Analyzer Agent   Qualification Agent
-        │                │                │
-        └────────────────┼────────────────┘
-                         ▼
-                  Proposal Agent
-                         │
-                         ▼
-                  Outreach Assistant
-                         │
-                         ▼
-                   Follow-up Agent
-                         │
-                         ▼
-                     CRM Agent
+                    USER
+                     │
+                     ▼
+              ┌─────────────┐
+              │   CLIENT    │
+              │ Next.js/TS  │
+              └──────┬──────┘
+                     │
+                  HTTPS/API
+                     │
+                     ▼
+              ┌─────────────┐
+              │   SERVER    │
+              │   FastAPI   │
+              └──────┬──────┘
+                     │
+             ┌───────┴────────┐
+             ▼                ▼
+        AI AGENTS          SERVICES
+             │                │
+     ┌───────┼────────┐       │
+     ▼       ▼        ▼       ▼
+ Research  Analysis  Sales   CRM
+     │       │        │       │
+     └───────┴────────┴───────┘
+                     │
+          ┌──────────┼──────────┐
+          ▼          ▼          ▼
+       PostgreSQL   Redis    Vector DB
+      (with pgvector)           │
+          │          │          │
+          └──────────┼──────────┘
+                     ▼
+              External APIs
 ```
 
-Each agent has a specific responsibility while the Manager Agent coordinates the overall workflow.
+---
 
-## Technology Stack
+## 🤖 AI Agent Layer & Orchestration
 
-### Client (Frontend)
+LeadPilot AI employs a **LangGraph-powered Multi-Agent System** coordinated by a central Manager Agent:
 
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
+```text
+Manager Agent
+      │
+      ▼
+Planner Agent
+      │
+      ├──► Research Agent
+      │
+      ├──► Company Analyzer
+      │
+      ├──► Lead Qualifier
+      │
+      ├──► Proposal Agent
+      │       │
+      │       ▼
+      │   [ Human Approval Gate ]
+      │       │
+      ├──► Outreach Agent
+      │
+      ├──► Follow-up Agent
+      │
+      └──► CRM Agent
+```
 
-### Server (Backend)
+### Agent Responsibilities:
+* 👑 **Manager Agent**: Evaluates incoming user requests and dynamically routes tasks to the appropriate specialized agents.
+* 📋 **Planner Agent**: Decomposes complex multi-step goals into sequential execution graphs.
+* 🔎 **Research Agent**: Discovers potential targets and leads across permitted business directories and APIs.
+* 🏢 **Company Analyzer**: Analyzes prospect websites, tech stacks, business services, and pain points.
+* 🧠 **Lead Qualifier**: Scores leads based on Ideal Client Profile (ICP) criteria.
+* ✍️ **Proposal Agent**: Generates custom tailored sales proposals and pitch drafts based on company research.
+* 📧 **Outreach Agent**: Prepares and sends approved outreach campaigns via official APIs.
+* 🔄 **Follow-up Agent**: Monitors client interactions and schedules timely follow-ups.
+* 📊 **CRM Agent**: Maintains deal stages, contacts, tasks, and syncs pipeline metrics.
 
-* Python
-* FastAPI
-* PostgreSQL
-* Redis
+---
 
-### AI
+## 💡 Example Execution Flow
 
-* OpenAI API
-* LangGraph
-* RAG
-* Embeddings
-* Vector Search
+**User Goal**: *"USA mein 20 potential web-development companies find karo."*
 
-### Automation
+```text
+User Request
+     │
+     ▼
+Manager Agent (Determines plan & assigns tasks)
+     │
+     ▼
+Research Agent (Finds target companies in USA)
+     │
+     ▼
+Company Analyzer (Scrapes/analyzes websites & business services)
+     │
+     ▼
+Lead Qualifier (Filters and scores top relevant leads)
+     │
+     ▼
+Proposal Agent (Drafts personalized proposals for top leads)
+     │
+     ▼
+🔐 [ Human Approval Gate ] (User reviews & approves proposals)
+     │
+     ▼
+Outreach Agent (Executes email/messaging outreach)
+     │
+     ▼
+CRM Agent (Updates deal status & schedules follow-up)
+```
 
-* Playwright
-* n8n
-* Background Workers
+---
 
-### Infrastructure
+## 🔐 Security & Permission Philosophy
 
-* Docker
-* GitHub Actions
-* Cloud/VPS deployment
-* Monitoring and logging
+LeadPilot AI is engineered around strict zero-trust security and compliance principles:
 
-## Security Philosophy
+* 🛡️ **Zero Raw Password Sharing**: AI Agents **NEVER** receive raw user passwords or credentials. Authentication relies strictly on OAuth 2.0, encrypted tokens, and scoped API keys.
+* 🔒 **Least-Privilege Scoping**: Agents are granted only the precise API permissions necessary to fulfill their immediate task.
+* 🛑 **Human-in-the-Loop Approval**: High-impact actions (such as sending proposals or initiating outreach messages) require explicit human review and approval before execution.
+* 📜 **Permitted Workflows & Compliance**: Integrations with platforms like LinkedIn, Upwork, Fiverr, and Meta prioritize official APIs, permitted workflows, and user safety over unauthorized scraping or spamming.
 
-LeadPilot AI is designed around **least-privilege access, secure authentication, human approval where appropriate, and responsible automation**.
+---
 
-The system should not require users to hand over raw passwords to an AI agent. Supported integrations should use official APIs, OAuth, secure tokens, or permitted workflows whenever available.
+## 🛠️ Recommended Technology Stack
 
-The platform is intended to assist with legitimate business development rather than uncontrolled spam, unauthorized scraping, or actions that violate third-party platform rules.
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend (Client)** | Next.js (App Router) + TypeScript |
+| **UI Design** | Tailwind CSS + Lucide Icons + Framer Motion |
+| **Backend (Server)** | Python 3.11+ + FastAPI |
+| **AI Models** | OpenAI API (GPT-4o / Embeddings) |
+| **Agent Orchestration** | LangGraph + LangChain |
+| **Primary Database** | PostgreSQL |
+| **Vector Storage** | `pgvector` extension |
+| **Cache & Message Broker** | Redis |
+| **Background Tasks** | Celery / Worker Processors |
+| **Browser Tooling** | Playwright |
+| **Workflow Automation** | n8n |
+| **Authentication** | OAuth 2.0 + Secure Sessions / JWT |
+| **Containerization** | Docker & Docker Compose |
+| **CI / CD** | GitHub Actions |
+| **Observability** | OpenTelemetry + Structured Logging |
+| **Deployment** | Cloud / VPS (Docker Compose / Kubernetes) |
 
-## Vision
+---
 
-The long-term vision of LeadPilot AI is to become an intelligent **Client Acquisition Operating System** where a business can manage its entire prospecting workflow from one place.
+## 🚀 Getting Started
 
-Instead of manually switching between search engines, spreadsheets, CRM systems, email, research tools, and proposal software, users can use LeadPilot AI to coordinate these workflows through intelligent AI agents.
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 20+
+- Python 3.11+
 
-### Long-Term Goal
+### Quick Start
+```bash
+# Clone the repository
+git clone https://github.com/M-Numan12/leadpilot-ai.git
+cd leadpilot-ai
 
-> **Find the right prospects. Understand their business. Recommend the right service. Prepare the right conversation. Manage the relationship.**
+# Start full application with Docker Compose
+docker-compose up -d --build
+```
 
-**LeadPilot AI — Your AI-Powered Client Acquisition System.**
+- **Client App**: [http://localhost:3000](http://localhost:3000)
+- **Server API**: [http://localhost:8000/api/v1](http://localhost:8000/api/v1)
+- **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
