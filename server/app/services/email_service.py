@@ -27,8 +27,10 @@ def dispatch_email_via_resend(to_email: str, subject: str, body_text: str):
 
     headers = {
         "Authorization": f"Bearer {resend_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "User-Agent": "ResendPython/1.0.0 (LeadPilotAI)"
     }
+
 
     try:
         req = urllib.request.Request(
