@@ -1,4 +1,6 @@
 import React from 'react';
+import '@/styles/globals.css';
+import { AppProvider } from '@/providers/AppProvider';
 
 export const metadata = {
   title: 'LeadPilot AI - Intelligent Sales Automation',
@@ -12,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AppProvider>{children}</AppProvider>
+      </body>
     </html>
   );
 }

@@ -29,8 +29,13 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local DB & Build Info
+*.db
+*.tsbuildinfo
+
 # Docker & Local Data
 pgdata/
 redisdata/
 logs/
 *.log
+

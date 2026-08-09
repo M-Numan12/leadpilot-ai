@@ -2,11 +2,12 @@ from fastapi import APIRouter
 from app.api.v1 import (
     auth, users, organizations, leads, companies, contacts,
     campaigns, conversations, proposals, crm, agents, analytics,
-    integrations, webhooks
+    integrations, webhooks, business
 )
 
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth", tags=["Auth"])
+router.include_router(business.router, prefix="/business", tags=["Business Profile"])
 router.include_router(users.router, prefix="/users", tags=["Users"])
 router.include_router(organizations.router, prefix="/organizations", tags=["Organizations"])
 router.include_router(leads.router, prefix="/leads", tags=["Leads"])
