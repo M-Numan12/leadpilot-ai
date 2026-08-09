@@ -1,5 +1,5 @@
 {
-  "name": "leadpilot-frontend",
+  "name": "leadpilot-client",
   "version": "0.1.0",
   "private": true,
   "scripts": {

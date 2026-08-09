@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  frontend:
+  client:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
     depends_on:
-      - backend
+      - server
 
-  backend:
+  server:
     build:
-      context: ./backend
+      context: ./server
       dockerfile: Dockerfile
     ports:
       - "8000:8000"

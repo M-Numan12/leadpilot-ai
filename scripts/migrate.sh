@@ -2,6 +2,6 @@
 set -e
 
 echo "=== Running Database Migrations ==="
-cd backend
+cd server
 alembic upgrade head
 echo "=== Migrations Completed Successfully ==="

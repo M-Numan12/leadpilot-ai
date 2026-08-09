@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "leadpilot-backend"
+name = "leadpilot-server"
 version = "0.1.0"
-description = "LeadPilot AI FastAPI Backend"
+description = "LeadPilot AI FastAPI Server"
 authors = ["LeadPilot Team <team@leadpilot.ai>"]
 
 [tool.poetry.dependencies]

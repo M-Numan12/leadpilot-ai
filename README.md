@@ -58,14 +58,14 @@ Each agent has a specific responsibility while the Manager Agent coordinates the
 
 ## Technology Stack
 
-### Frontend
+### Client (Frontend)
 
 * Next.js
 * React
 * TypeScript
 * Tailwind CSS
 
-### Backend
+### Server (Backend)
 
 * Python
 * FastAPI
