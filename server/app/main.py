@@ -13,6 +13,7 @@ from app.models.membership import Membership
 from app.models.business_profile import BusinessProfile
 from app.models.company import Company
 from app.models.lead import Lead
+from app.models.embed_widget import EmbedWidget
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,9 +28,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Configure CORS for local development and live production frontend domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://www.leadpilot-ai.online",
+        "https://leadpilot-ai.online",
+        "https://leadpilot-ai-gules.vercel.app"
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

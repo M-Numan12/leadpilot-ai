@@ -3,7 +3,17 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Key, Lock, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Mail, Key, Lock, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
+
+const getApiBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://leadpilot-api.onrender.com/api/v1';
+  }
+  return 'http://localhost:8000/api/v1';
+};
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -18,9 +28,9 @@ export default function ForgotPasswordPage() {
   const [successMessage, setSuccessMessage] = useState('');
 
   const router = useRouter();
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const API_BASE = getApiBaseUrl();
 
-  // STEP 1: Request 6-digit OTP code to email
+  // STEP 1: Request 6-digit OTP code to registered email
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -38,16 +48,14 @@ export default function ForgotPasswordPage() {
       setLoading(false);
 
       if (res.ok) {
-        setInfoMessage(`📩 6-Digit Verification OTP Code sent to ${email}. (Demo Code: ${data.demo_otp || '849201'})`);
+        setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${email}. Please check your inbox and enter the code below.`);
         setStep(2);
       } else {
-        setError(data.detail || 'Email address not found');
+        setError(data.detail || 'No registered user account found with this email address.');
       }
     } catch {
       setLoading(false);
-      // Fallback for dev mode
-      setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${email}. (Demo Code: 849201)`);
-      setStep(2);
+      setError('Cannot connect to backend server. Please verify your connection.');
     }
   };
 
@@ -83,19 +91,16 @@ export default function ForgotPasswordPage() {
       setLoading(false);
 
       if (res.ok) {
-        setSuccessMessage('🎉 Password updated successfully! You can now Sign In with your new password.');
+        setSuccessMessage('🎉 Password updated successfully! A confirmation email has been dispatched to your inbox. Redirecting to Sign In...');
         setTimeout(() => {
           router.push('/login');
         }, 3000);
       } else {
-        setError(data.detail || 'Invalid or expired OTP code.');
+        setError(data.detail || 'Invalid or expired OTP verification code.');
       }
     } catch {
       setLoading(false);
-      setSuccessMessage('🎉 Password updated successfully! Redirecting to Sign In...');
-      setTimeout(() => {
-        router.push('/login');
-      }, 3000);
+      setError('Cannot connect to backend server. Please try again.');
     }
   };
 
@@ -146,7 +151,7 @@ export default function ForgotPasswordPage() {
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
             {step === 1
-              ? 'Apna registered email address enter karein. System 6-digit OTP code aapke email par bhejega.'
+              ? 'Apna registered email address enter karein. System 6-digit OTP code aapke inbox mein bhejega.'
               : `Email (${email}) par bheja gaya 6-digit OTP code enter karke naya password set karein.`}
           </p>
         </div>
@@ -200,10 +205,13 @@ export default function ForgotPasswordPage() {
               padding: '12px 16px',
               borderRadius: '10px',
               fontSize: '13px',
-              marginBottom: '20px'
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}
           >
-            ⚠️ {error}
+            <AlertCircle size={16} /> {error}
           </div>
         )}
 
@@ -267,17 +275,6 @@ export default function ForgotPasswordPage() {
         {/* STEP 2: ENTER OTP & NEW PASSWORD FORM */}
         {step === 2 && !successMessage && (
           <form onSubmit={handleVerifyAndResetPassword}>
-            {/* Quick Demo Helper Button */}
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => setOtpCode('849201')}
-                style={{ padding: '4px 10px', borderRadius: '6px', background: '#0f172a', border: '1px solid #334155', color: '#818cf8', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
-              >
-                Auto-Fill Demo Code (849201)
-              </button>
-            </div>
-
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#cbd5e1', marginBottom: '8px' }}>
                 6-Digit Email Verification Code (OTP)
@@ -290,7 +287,7 @@ export default function ForgotPasswordPage() {
                   maxLength={6}
                   value={otpCode}
                   onChange={e => setOtpCode(e.target.value)}
-                  placeholder="849201"
+                  placeholder="Enter 6-digit OTP from email"
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 42px',

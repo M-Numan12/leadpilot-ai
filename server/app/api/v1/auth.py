@@ -26,12 +26,13 @@ from app.services.email_service import (
     send_registration_welcome_email,
     send_login_security_email,
     send_password_reset_otp_email,
+    send_password_changed_confirmation_email,
     send_registration_otp_email
 )
 
 router = APIRouter()
 
-# In-memory OTP storage for demo/dev verification
+# In-memory OTP storage for live email verification
 OTP_STORE = {}
 
 @router.post("/forgot-password/request")
@@ -39,7 +40,7 @@ async def request_password_reset_otp(
     req: ForgotPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.email == req.email))
+    result = await db.execute(select(User).where(User.email == req.email.lower()))
     user = result.scalars().first()
     
     if not user:
@@ -48,11 +49,11 @@ async def request_password_reset_otp(
             detail="No registered user account found with this email address."
         )
     
-    # Generate 6-digit OTP
+    # Generate random 6-digit OTP code
     otp_code = f"{random.randint(100000, 999999)}"
     OTP_STORE[req.email.lower()] = otp_code
     
-    # Dispatch OTP Email
+    # Dispatch OTP Email via Resend
     try:
         send_password_reset_otp_email(user.email, otp_code)
     except Exception as e:
@@ -61,8 +62,7 @@ async def request_password_reset_otp(
     return {
         "success": True,
         "message": f"6-digit OTP Verification code sent to {user.email}",
-        "email": user.email,
-        "demo_otp": otp_code  # Provided for easy local UI testing
+        "email": user.email
     }
 
 @router.post("/forgot-password/verify-reset")
@@ -70,18 +70,18 @@ async def verify_otp_and_reset_password(
     req: VerifyResetPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.email == req.email))
+    result = await db.execute(select(User).where(User.email == req.email.lower()))
     user = result.scalars().first()
     
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User account not found"
+            detail="No registered user account found with this email address."
         )
     
     saved_otp = OTP_STORE.get(req.email.lower())
-    # Accept valid saved OTP or default demo OTP 849201
-    if not saved_otp or (req.otp_code != saved_otp and req.otp_code != "849201"):
+    # Require exact matching 6-digit OTP code received in email
+    if not saved_otp or req.otp_code != saved_otp:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired 6-digit OTP verification code."
@@ -91,12 +91,18 @@ async def verify_otp_and_reset_password(
     user.hashed_password = hash_password(req.new_password)
     await db.commit()
     
-    # Clean up OTP
+    # Clean up OTP from store
     OTP_STORE.pop(req.email.lower(), None)
     
+    # Dispatch Password Changed Confirmation Email via Resend
+    try:
+        send_password_changed_confirmation_email(user.email, user.full_name)
+    except Exception as e:
+        print(f"Password changed email error: {e}")
+
     return {
         "success": True,
-        "message": "Password updated successfully! You can now Sign In with your new password."
+        "message": "Password updated successfully! A confirmation email has been sent to your inbox."
     }
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -105,7 +111,7 @@ async def register(
     db: AsyncSession = Depends(get_db)
 ):
     # Check existing user
-    result = await db.execute(select(User).where(User.email == req.email))
+    result = await db.execute(select(User).where(User.email == req.email.lower()))
     existing_user = result.scalars().first()
     if existing_user:
         raise HTTPException(
@@ -115,14 +121,14 @@ async def register(
     
     # Create User
     new_user = User(
-        email=req.email,
+        email=req.email.lower(),
         hashed_password=hash_password(req.password),
         full_name=req.full_name
     )
     db.add(new_user)
     await db.flush()  # gets user.id
     
-    # Create Organization & Membership if provided
+    # Create Organization & Membership
     org_name = req.organization_name or f"{req.full_name or req.email}'s Org"
     org_slug = org_name.lower().replace(" ", "-").replace("'", "")
     new_org = Organization(name=org_name, slug=f"{org_slug}-{new_user.id[:8]}")
@@ -138,7 +144,7 @@ async def register(
     await db.commit()
     await db.refresh(new_user)
 
-    # Dispatch Registration Confirmation Email
+    # Dispatch Registration Confirmation Email via Resend
     try:
         send_registration_welcome_email(new_user.email, new_user.full_name)
     except Exception as e:
@@ -157,7 +163,7 @@ async def login(
     req: LoginRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.email == req.email))
+    result = await db.execute(select(User).where(User.email == req.email.lower()))
     user = result.scalars().first()
     
     if not user or not verify_password(req.password, user.hashed_password):
@@ -173,7 +179,7 @@ async def login(
             detail="User account is inactive"
         )
         
-    # Dispatch Security Login Alert Email
+    # Dispatch Security Login Alert Email via Resend
     try:
         send_login_security_email(user.email, user.full_name)
     except Exception as e:
@@ -189,4 +195,3 @@ async def login(
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
     return UserResponse.model_validate(current_user)
-

@@ -13,7 +13,6 @@ interface User {
   ai_credits?: string;
 }
 
-
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -25,13 +24,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const getApiBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://leadpilot-api.onrender.com/api/v1';
+  }
+  return 'http://localhost:8000/api/v1';
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
+
+  const API_BASE = getApiBaseUrl();
 
   useEffect(() => {
     const savedToken = localStorage.getItem('leadpilot_token');
