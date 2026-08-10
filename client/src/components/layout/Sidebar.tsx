@@ -27,7 +27,8 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCheck,
-  Briefcase
+  Briefcase,
+  Radio
 } from 'lucide-react';
 
 interface NavItem {
@@ -61,6 +62,7 @@ export function Sidebar() {
     {
       title: 'Sales & Outreach',
       items: [
+        { label: 'Inbound & Embeds', href: '/dashboard/inbound', icon: Radio, badge: 'NEW' },
         { label: 'Campaigns', href: '/dashboard/campaigns', icon: Briefcase },
         { label: 'Conversations', href: '/dashboard/conversations', icon: MessageSquare },
         { label: 'Proposals', href: '/dashboard/proposals', icon: FileText },

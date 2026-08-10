@@ -11,6 +11,7 @@ from app.models.proposal import Proposal
 from app.models.task import Task
 from app.models.agent_run import AgentRun
 from app.models.audit_log import AuditLog
+from app.models.embed_widget import EmbedWidget
 
 __all__ = [
     "Base",
@@ -25,5 +26,6 @@ __all__ = [
     "Proposal",
     "Task",
     "AgentRun",
-    "AuditLog"
+    "AuditLog",
+    "EmbedWidget"
 ]
