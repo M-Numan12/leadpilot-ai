@@ -8,12 +8,19 @@ import os
 import asyncio
 import time
 
+# Ensure UTF-8 output encoding on Windows console
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+
 # Add server directory to python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "server"))
 
 from sqlalchemy import text
 from app.database.connection import engine
 from app.models.base import Base
+
+# Import all models to ensure metadata registration
+import app.models  # noqa: F401
 
 async def init_neon_database():
     print("=" * 60)
@@ -27,12 +34,12 @@ async def init_neon_database():
     start_time = time.time()
     try:
         async with engine.begin() as conn:
-            print("➜ Checking live database connection ping...")
-            result = await conn.execute(text("SELECT 1;"))
+            print("➜ Checking live Neon PostgreSQL connection ping...")
+            await conn.execute(text("SELECT 1;"))
             ping = (time.time() - start_time) * 1000
             print(f"✔ Live Connection Established! Latency: {ping:.2f}ms")
 
-            print("➜ Running schema migration & table auto-creation...")
+            print("➜ Running schema migration & table auto-creation on Neon DB...")
             await conn.run_sync(Base.metadata.create_all)
             print("✔ All database tables verified and created successfully!")
 

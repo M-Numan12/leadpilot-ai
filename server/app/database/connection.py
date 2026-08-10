@@ -10,6 +10,10 @@ if db_url.startswith("postgres://"):
 elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+asyncpg://"):
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
+# Handle asyncpg ssl argument mapping for Neon DB (sslmode -> ssl)
+if "postgresql+asyncpg" in db_url and "sslmode=" in db_url:
+    db_url = db_url.replace("sslmode=require", "ssl=require").replace("sslmode=prefer", "ssl=prefer")
+
 # Configure engine with connection pooling parameters for Neon Serverless Postgres
 engine_args = {"echo": False}
 if "postgresql+asyncpg" in db_url:
