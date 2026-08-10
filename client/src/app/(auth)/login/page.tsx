@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldCheck, UserCheck, Lock, Mail, Sparkles, ArrowRight } from 'lucide-react';
+import { ShieldCheck, UserCheck, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const [role, setRole] = useState<'user' | 'admin'>('user');
@@ -19,8 +19,8 @@ export default function LoginPage() {
     setRole(selectedRole);
     setError('');
     if (selectedRole === 'admin') {
-      setEmail('admin@leadpilot.ai');
-      setPassword('Password123!');
+      setEmail('numan@leadpilot-ai.online');
+      setPassword('Numannaeem12345!');
     } else {
       setEmail('sales@leadpilot.ai');
       setPassword('Password123!');
@@ -36,18 +36,15 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result.success) {
-      if (role === 'admin' || email.includes('admin')) {
-        router.push('/admin');
-      } else {
-        router.push('/dashboard/overview');
-      }
-    } else {
-      // In dev fallback, redirect based on selected role
+      // Fetch stored token user or role check
+      const token = localStorage.getItem('leadpilot_token');
       if (role === 'admin') {
         router.push('/admin');
       } else {
         router.push('/dashboard/overview');
       }
+    } else {
+      setError(result.error || 'Invalid email address or password. Please enter valid credentials.');
     }
   };
 
@@ -100,7 +97,7 @@ export default function LoginPage() {
             LeadPilot AI
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
-            {role === 'admin' ? 'Enterprise System Operations & Admin Portal' : 'Sales Automation & Prospecting Workspace'}
+            {role === 'admin' ? 'Super Administrator Portal & Operations' : 'Sales Automation & Prospecting Workspace'}
           </p>
         </div>
 
@@ -172,10 +169,13 @@ export default function LoginPage() {
               padding: '12px 16px',
               borderRadius: '10px',
               fontSize: '13px',
-              marginBottom: '20px'
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}
           >
-            ⚠️ {error}
+            <AlertCircle size={16} /> {error}
           </div>
         )}
 
@@ -183,7 +183,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#cbd5e1', marginBottom: '8px' }}>
-              {role === 'admin' ? 'Administrator Email' : 'Work Email'}
+              {role === 'admin' ? 'Super Administrator Email' : 'Work Email'}
             </label>
             <div style={{ position: 'relative' }}>
               <Mail size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
@@ -192,7 +192,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === 'admin' ? 'admin@leadpilot.ai' : 'you@company.com'}
+                placeholder={role === 'admin' ? 'numan@leadpilot-ai.online' : 'you@company.com'}
                 style={{
                   width: '100%',
                   padding: '12px 16px 12px 42px',
@@ -262,54 +262,13 @@ export default function LoginPage() {
               gap: '8px'
             }}
           >
-            <span>{loading ? 'Authenticating...' : role === 'admin' ? 'Sign In to Admin Portal' : 'Sign In to Sales Workspace'}</span>
+            <span>{loading ? 'Authenticating Email & Password...' : role === 'admin' ? 'Sign In to Admin Portal' : 'Sign In to Sales Workspace'}</span>
             <ArrowRight size={18} />
           </button>
         </form>
 
-        {/* GitHub Social OAuth Login */}
-        <div style={{ marginTop: '20px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              setLoading(true);
-              // GitHub OAuth simulation
-              setTimeout(() => {
-                login('numannaseem134@github.com', 'GitHubOAuthPass123!').then(() => {
-                  if (role === 'admin') {
-                    router.push('/admin');
-                  } else {
-                    router.push('/dashboard/overview');
-                  }
-                });
-              }, 1200);
-            }}
-            style={{
-              width: '100%',
-              padding: '13px',
-              borderRadius: '12px',
-              background: '#0f172a',
-              border: '1px solid #334155',
-              color: '#ffffff',
-              fontSize: '14px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-            </svg>
-            <span>Sign In with GitHub</span>
-          </button>
-        </div>
-
         {/* Demo Quick Fill Buttons */}
-        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #334155', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center' }}>
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #334155', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center' }}>
           <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Quick Demo Auto-Fill</span>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
@@ -317,18 +276,17 @@ export default function LoginPage() {
               onClick={() => handleRoleSwitch('user')}
               style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#0f172a', border: '1px solid #334155', color: '#818cf8', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
             >
-              💼 Fill User Login
+              💼 Sales User Credentials
             </button>
             <button
               type="button"
               onClick={() => handleRoleSwitch('admin')}
               style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#0f172a', border: '1px solid #334155', color: '#fcd34d', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
             >
-              🛡️ Fill Admin Login
+              🛡️ Super Admin Credentials
             </button>
           </div>
         </div>
-
 
         {/* Footer Link */}
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#94a3b8' }}>

@@ -14,6 +14,6 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: RESEND_FROM_EMAIL
-        value: onboarding@resend.dev
+        value: numan@leadpilot-ai.online
       - key: RESEND_API_KEY
         sync: false
