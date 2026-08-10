@@ -2,5 +2,22 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
+db_url = settings.DATABASE_URL
+
+# Normalize PostgreSQL URLs for SQLAlchemy asyncpg (Neon DB compatibility)
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+asyncpg://"):
+    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+# Configure engine with connection pooling parameters for Neon Serverless Postgres
+engine_args = {"echo": False}
+if "postgresql+asyncpg" in db_url:
+    engine_args.update({
+        "pool_pre_ping": True,
+        "pool_size": 10,
+        "max_overflow": 20
+    })
+
+engine = create_async_engine(db_url, **engine_args)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
