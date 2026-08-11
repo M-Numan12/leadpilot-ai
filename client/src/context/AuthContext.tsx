@@ -87,31 +87,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (u: any) => u.email.toLowerCase() === cleanEmail && u.password === pass
     );
 
-    // Default system credentials
-    const isSuperAdminEmail = cleanEmail.includes('numan') || cleanEmail.includes('admin');
-    const isDefaultSalesEmail = cleanEmail === 'sales@leadpilot.ai';
+    // Master Super Admin account check
+    const isMasterSuperAdmin = cleanEmail === 'admin@leadpilot-ai.online' && pass === 'SuperAdmin2026!';
 
-    const isValidAccount = foundLocalUser || isSuperAdminEmail || isDefaultSalesEmail;
+    if (isMasterSuperAdmin) {
+      const superAdminUser: User = {
+        id: 'usr-master-super-admin',
+        email: 'admin@leadpilot-ai.online',
+        full_name: 'Master Super Administrator',
+        is_active: true,
+        is_superuser: true,
+        is_unlimited_credits: true,
+        ai_credits: 'UNLIMITED'
+      };
 
-    if (isValidAccount) {
-      const authenticatedUser: User = foundLocalUser
-        ? foundLocalUser.user
-        : {
-            id: isSuperAdminEmail ? 'usr-super-admin' : 'usr-sales-rep',
-            email: email,
-            full_name: foundLocalUser?.full_name || (isSuperAdminEmail ? 'Super Administrator' : 'Sales User'),
-            is_active: true,
-            is_superuser: isSuperAdminEmail,
-            is_unlimited_credits: true,
-            ai_credits: 'UNLIMITED'
-          };
+      setToken('leadpilot_master_superadmin_session_token_2026');
+      setUser(superAdminUser);
+      localStorage.setItem('leadpilot_token', 'leadpilot_master_superadmin_session_token_2026');
 
-      // Set state and token INSTANTLY in <10ms
-      setToken('leadpilot_active_auth_session_token_2026');
-      setUser(authenticatedUser);
-      localStorage.setItem('leadpilot_token', 'leadpilot_active_auth_session_token_2026');
-
-      // Asynchronously attempt backend sync without blocking the user's UI
+      // Async sync with cloud backend
       fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -127,10 +121,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(() => {});
 
-      return { success: true, user: authenticatedUser };
+      return { success: true, user: superAdminUser };
     }
 
-    // Try live API if not matched locally
+    if (foundLocalUser) {
+      setToken('leadpilot_active_auth_session_token_2026');
+      setUser(foundLocalUser.user);
+      localStorage.setItem('leadpilot_token', 'leadpilot_active_auth_session_token_2026');
+
+      fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.access_token && data.user) {
+            setToken(data.access_token);
+            setUser(data.user);
+            localStorage.setItem('leadpilot_token', data.access_token);
+          }
+        })
+        .catch(() => {});
+
+      return { success: true, user: foundLocalUser.user };
+    }
+
+    // Try live backend database API
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -139,16 +156,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        return { success: false, error: data.detail || 'Invalid email address or password. Only registered accounts can sign in.' };
+        return { success: false, error: data.detail || 'Account not found. Please register first.' };
       }
       setToken(data.access_token);
       setUser(data.user);
       localStorage.setItem('leadpilot_token', data.access_token);
       return { success: true, user: data.user };
     } catch {
-      return { success: false, error: 'Invalid email address or password. Only registered accounts can sign in.' };
+      return { success: false, error: 'Account not found. Please register first on the Register page.' };
     }
   };
+
 
   const register = async (email: string, pass: string, fullName?: string, orgName?: string) => {
     const cleanEmail = email.trim().toLowerCase();

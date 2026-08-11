@@ -15,12 +15,33 @@ from app.models.company import Company
 from app.models.lead import Lead
 from app.models.embed_widget import EmbedWidget
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.database.connection import AsyncSessionLocal
+from app.security.authentication import hash_password
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Auto-create tables on startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # Seed single Master Super Admin account
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.email == "admin@leadpilot-ai.online"))
+        admin_user = result.scalar_one_or_none()
+        if not admin_user:
+            master_admin = User(
+                email="admin@leadpilot-ai.online",
+                hashed_password=hash_password("SuperAdmin2026!"),
+                full_name="Super Administrator",
+                is_active=True,
+                is_superuser=True
+            )
+            session.add(master_admin)
+            await session.commit()
     yield
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

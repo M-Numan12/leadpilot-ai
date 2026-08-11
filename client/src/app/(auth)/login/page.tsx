@@ -19,13 +19,14 @@ export default function LoginPage() {
     setRole(selectedRole);
     setError('');
     if (selectedRole === 'admin') {
-      setEmail('numan@leadpilot-ai.online');
-      setPassword('Numannaeem12345!');
+      setEmail('admin@leadpilot-ai.online');
+      setPassword('SuperAdmin2026!');
     } else {
-      setEmail('sales@leadpilot.ai');
-      setPassword('Password123!');
+      setEmail('');
+      setPassword('');
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
