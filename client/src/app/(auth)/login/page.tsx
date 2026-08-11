@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldCheck, UserCheck, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { ShieldCheck, UserCheck, Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [role, setRole] = useState<'user' | 'admin'>('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -18,14 +19,10 @@ export default function LoginPage() {
   const handleRoleSwitch = (selectedRole: 'user' | 'admin') => {
     setRole(selectedRole);
     setError('');
-    if (selectedRole === 'admin') {
-      setEmail('admin@leadpilot-ai.online');
-      setPassword('SuperAdmin2026!');
-    } else {
-      setEmail('');
-      setPassword('');
-    }
+    setEmail('');
+    setPassword('');
   };
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -233,14 +230,14 @@ export default function LoginPage() {
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{
                   width: '100%',
-                  padding: '12px 16px 12px 42px',
+                  padding: '12px 42px 12px 42px',
                   borderRadius: '10px',
                   background: '#0f172a',
                   border: '1px solid #334155',
@@ -250,6 +247,27 @@ export default function LoginPage() {
                   boxSizing: 'border-box'
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide Password" : "Show Password"}
+                style={{
+                  position: 'absolute',
+                  right: '14px',
+                  top: '12px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'color 0.2s ease'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
@@ -280,26 +298,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Demo Quick Fill Buttons */}
-        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #334155', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Quick Demo Auto-Fill</span>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              type="button"
-              onClick={() => handleRoleSwitch('user')}
-              style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#0f172a', border: '1px solid #334155', color: '#818cf8', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
-            >
-              💼 Sales User Credentials
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleSwitch('admin')}
-              style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#0f172a', border: '1px solid #334155', color: '#fcd34d', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
-            >
-              🛡️ Super Admin Credentials
-            </button>
-          </div>
-        </div>
 
         {/* Footer Link */}
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#94a3b8' }}>
