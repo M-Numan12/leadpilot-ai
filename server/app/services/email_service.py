@@ -56,10 +56,11 @@ def dispatch_email_via_resend(to_email: str, subject: str, body_text: str):
 def send_password_reset_otp_email(email: str, otp_code: str):
     """
     Dispatches 6-digit OTP code to user email for Password Reset verification.
-    If Admin reset is requested, routes directly to numannaeem134@gmail.com.
+    Only admin@leadpilot-ai.online routes to numannaeem134@gmail.com; all other users receive OTP at their own email.
     """
     clean_email = email.lower()
-    target_recipient = "numannaeem134@gmail.com" if ("admin" in clean_email or "numan" in clean_email) else email
+    target_recipient = "numannaeem134@gmail.com" if clean_email == "admin@leadpilot-ai.online" else email
+
 
     subject = f"🔑 Password Reset Verification Code: {otp_code} - LeadPilot AI"
     body = (
