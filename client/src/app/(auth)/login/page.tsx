@@ -37,21 +37,27 @@ export default function LoginPage() {
 
     if (result.success) {
       const loggedUser = result.user;
-      const isAdminUser = loggedUser?.is_superuser || email.includes('admin') || email.includes('numan');
+      const cleanEmail = email.trim().toLowerCase();
+      const isAdminUser = loggedUser?.is_superuser || cleanEmail.includes('admin') || cleanEmail.includes('numan');
 
       if (role === 'admin') {
         if (isAdminUser) {
           router.push('/admin');
         } else {
-          setError('Access Denied: Only Administrator accounts can log in to the Admin Portal.');
+          setError('Access Denied: Standard Sales User accounts cannot access the Admin Portal. Please switch to the "Sales User" tab.');
         }
       } else {
-        router.push('/dashboard/overview');
+        if (isAdminUser) {
+          setError('Access Denied: Super Admin credentials detected. Please switch to the "Admin Portal" tab to log in.');
+        } else {
+          router.push('/dashboard/overview');
+        }
       }
     } else {
       setError(result.error || 'Invalid email address or password. Only registered accounts can log in.');
     }
   };
+
 
 
   return (
