@@ -18,12 +18,14 @@ def dispatch_email_via_resend(to_email: str, subject: str, body_text: str):
         return False
 
     url = "https://api.resend.com/emails"
+    sender_identity = settings.RESEND_FROM_EMAIL if ("onboarding@resend.dev" in settings.RESEND_FROM_EMAIL or "LeadPilot" in settings.RESEND_FROM_EMAIL) else "LeadPilot AI Security <onboarding@resend.dev>"
     payload = {
-        "from": settings.RESEND_FROM_EMAIL or "LeadPilot AI <numan@leadpilot-ai.online>",
+        "from": sender_identity,
         "to": [to_email],
         "subject": subject,
         "text": body_text
     }
+
 
     headers = {
         "Authorization": f"Bearer {resend_key}",
