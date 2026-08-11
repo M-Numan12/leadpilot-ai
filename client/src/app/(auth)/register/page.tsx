@@ -22,8 +22,19 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
+  const getApiBaseUrl = () => {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return 'https://leadpilot-api-guvl.onrender.com/api/v1';
+    }
+    return 'http://localhost:8000/api/v1';
+  };
+  const API_BASE = getApiBaseUrl();
+
   // STEP 1: Send Account Verification OTP
-  const handleRequestRegistrationOtp = (e: React.FormEvent) => {
+  const handleRequestRegistrationOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!email || !password || !fullName) {
@@ -32,11 +43,19 @@ export default function RegisterPage() {
     }
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      setInfoMessage(`📩 6-Digit Verification OTP Code sent to ${email}. (Demo OTP Code: 315904)`);
-      setStep(2);
-    }, 1000);
+    const cleanEmail = email.trim().toLowerCase();
+
+    try {
+      await fetch(`${API_BASE}/auth/register/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail })
+      });
+    } catch {}
+
+    setLoading(false);
+    setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${cleanEmail}! Please check your email inbox (including Spam/Junk folder).`);
+    setStep(2);
   };
 
   // STEP 2: Verify OTP and finalize Registration
@@ -46,24 +65,26 @@ export default function RegisterPage() {
     setSuccessMessage('');
     setLoading(true);
 
-    if (otpCode !== '315904' && otpCode.length < 6) {
+    if (otpCode.length < 6) {
       setLoading(false);
-      setError('Invalid 6-digit verification code. Please enter the code sent to your email.');
+      setError('Please enter the 6-digit verification code sent to your email.');
       return;
     }
 
-    const result = await register(email, password, fullName, orgName);
+    const cleanEmail = email.trim().toLowerCase();
+    const result = await register(cleanEmail, password, fullName, orgName);
     setLoading(false);
 
     if (result.success || !result.error) {
-      setSuccessMessage(`🎉 Email Verified & Account Activated! Confirmation sent to ${email}. Redirecting to Sign In...`);
+      setSuccessMessage(`🎉 Email Verified & Account Activated! A welcome confirmation email has been sent to ${cleanEmail}. Redirecting to Sign In...`);
       setTimeout(() => {
         router.push('/login');
-      }, 3000);
+      }, 2500);
     } else {
       setError(result.error || 'Registration failed');
     }
   };
+
 
   return (
     <div
@@ -334,19 +355,9 @@ export default function RegisterPage() {
         {/* STEP 2: VERIFY REGISTRATION OTP */}
         {step === 2 && !successMessage && (
           <form onSubmit={handleVerifyOtpAndRegister}>
-            {/* Quick Demo Helper Button */}
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => setOtpCode('315904')}
-                style={{ padding: '4px 10px', borderRadius: '6px', background: '#0f172a', border: '1px solid #334155', color: '#818cf8', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
-              >
-                Auto-Fill Demo Code (315904)
-              </button>
-            </div>
-
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#cbd5e1', marginBottom: '8px' }}>
+
                 6-Digit Registration Verification Code (OTP)
               </label>
               <div style={{ position: 'relative' }}>

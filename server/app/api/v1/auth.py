@@ -90,11 +90,41 @@ async def verify_otp_and_reset_password(
     }
 
 
+@router.post("/register/request-otp")
+async def request_registration_otp(
+    req: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    clean_email = req.email.lower().strip()
+    result = await db.execute(select(User).where(User.email == clean_email))
+    existing_user = result.scalars().first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A registered account with this email address already exists. Please Sign In."
+        )
+
+    otp_code = f"{random.randint(100000, 999999)}"
+    OTP_STORE[f"reg_{clean_email}"] = otp_code
+
+    # Dispatch Registration OTP Email via Resend API
+    try:
+        send_registration_otp_email(clean_email, otp_code)
+    except Exception as e:
+        print(f"Registration OTP dispatch error: {e}")
+
+    return {
+        "success": True,
+        "message": f"6-digit OTP Verification code sent to {clean_email}",
+        "email": clean_email
+    }
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     req: RegisterRequest,
     db: AsyncSession = Depends(get_db)
 ):
+
     # Check existing user
     result = await db.execute(select(User).where(User.email == req.email.lower()))
     existing_user = result.scalars().first()
