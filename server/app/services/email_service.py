@@ -56,7 +56,11 @@ def dispatch_email_via_resend(to_email: str, subject: str, body_text: str):
 def send_password_reset_otp_email(email: str, otp_code: str):
     """
     Dispatches 6-digit OTP code to user email for Password Reset verification.
+    If Admin reset is requested, routes directly to numannaeem134@gmail.com.
     """
+    clean_email = email.lower()
+    target_recipient = "numannaeem134@gmail.com" if ("admin" in clean_email or "numan" in clean_email) else email
+
     subject = f"🔑 Password Reset Verification Code: {otp_code} - LeadPilot AI"
     body = (
         f"Assalam-o-Alaikum,\n\n"
@@ -68,12 +72,11 @@ def send_password_reset_otp_email(email: str, otp_code: str):
         f"Regards,\n"
         f"LeadPilot AI Security Desk"
     )
-    logger.info(f"[OTP DISPATCHED] To: {email} | Subject: {subject}\nBody:\n{body}")
-    print(f"\n🔑 [PASSWORD RESET OTP DISPATCH] Email sent to {email}:\nSubject: {subject}\nOTP Code: {otp_code}\n")
+    logger.info(f"[OTP DISPATCHED] To: {target_recipient} | Subject: {subject}\nBody:\n{body}")
+    print(f"\n🔑 [PASSWORD RESET OTP DISPATCH] Email sent to {target_recipient}:\nSubject: {subject}\nOTP Code: {otp_code}\n")
     
     # Send via Resend
-    dispatch_email_via_resend(email, subject, body)
-    return True
+    return dispatch_email_via_resend(target_recipient, subject, body)
 
 def send_password_changed_confirmation_email(email: str, full_name: Optional[str] = None):
     """

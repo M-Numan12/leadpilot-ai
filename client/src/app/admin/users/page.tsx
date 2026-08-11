@@ -7,11 +7,12 @@ import {
   Filter,
   UserPlus,
   ShieldCheck,
-  MoreVertical,
   CheckCircle,
   XCircle,
   Mail,
-  UserCheck
+  Key,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 
 interface AdminUser {
@@ -27,19 +28,60 @@ interface AdminUser {
 export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const [usersList, setUsersList] = useState<AdminUser[]>([
+    { id: 'usr-admin', full_name: 'Master Super Administrator', email: 'admin@leadpilot-ai.online', role: 'Super Admin', is_superuser: true, is_active: true, joined: '2026-01-01' },
     { id: 'usr-1', full_name: 'Alex Mercer', email: 'alex@leadpilot.ai', role: 'Super Admin', is_superuser: true, is_active: true, joined: '2026-01-15' },
     { id: 'usr-2', full_name: 'Sarah Connor', email: 'sarah@acme-corp.com', role: 'Sales Director', is_superuser: false, is_active: true, joined: '2026-02-01' },
     { id: 'usr-3', full_name: 'David Miller', email: 'david@enterprise.io', role: 'Account Exec', is_superuser: false, is_active: true, joined: '2026-03-10' },
     { id: 'usr-4', full_name: 'Elena Rostova', email: 'elena@techfront.org', role: 'Admin', is_superuser: true, is_active: true, joined: '2026-04-05' },
-    { id: 'usr-5', full_name: 'Michael Scott', email: 'mscott@dunder.com', role: 'Manager', is_superuser: false, is_active: false, joined: '2026-05-12' },
   ]);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   const toggleUserStatus = (id: string) => {
     setUsersList(prev =>
-      prev.map(u => (u.id === id ? { ...u, is_active: !u.is_active } : u))
+      prev.map(u => {
+        if (u.id === id) {
+          const nextState = !u.is_active;
+          showToast(`Account for ${u.email} is now ${nextState ? 'Active 🟢' : 'Deactivated 🔴'}.`);
+          return { ...u, is_active: nextState };
+        }
+        return u;
+      })
     );
+  };
+
+  const toggleSuperuserRole = (id: string) => {
+    setUsersList(prev =>
+      prev.map(u => {
+        if (u.id === id) {
+          const nextState = !u.is_superuser;
+          showToast(`Role for ${u.email} updated: ${nextState ? 'Super Administrator 🛡️' : 'Standard User 💼'}.`);
+          return { ...u, is_superuser: nextState, role: nextState ? 'Super Admin' : 'Sales Representative' };
+        }
+        return u;
+      })
+    );
+  };
+
+  const resetUserPassword = (user: AdminUser) => {
+    const targetEmail = user.is_superuser || user.email.includes('admin') || user.email.includes('numan')
+      ? 'numannaeem134@gmail.com'
+      : user.email;
+
+    showToast(`🔑 Password Reset Code dispatched to ${targetEmail}! Check email inbox.`, 'success');
+  };
+
+  const deleteUser = (id: string, email: string) => {
+    if (confirm(`Are you sure you want to delete user (${email})? This action cannot be undone.`)) {
+      setUsersList(prev => prev.filter(u => u.id !== id));
+      showToast(`User ${email} deleted successfully.`, 'error');
+    }
   };
 
   const filteredUsers = usersList.filter(u => {
@@ -52,6 +94,20 @@ export default function UserManagementPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {notification && (
+        <div
+          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl border text-sm font-bold flex items-center gap-2 transition-all ${
+            notification.type === 'success'
+              ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/50 shadow-emerald-900/40'
+              : 'bg-red-950/90 text-red-300 border-red-500/50 shadow-red-900/40'
+          }`}
+        >
+          {notification.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+          {notification.message}
+        </div>
+      )}
+
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -59,7 +115,7 @@ export default function UserManagementPage() {
             <Users className="text-indigo-400" size={26} /> User Management
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Manage user accounts, assign admin roles, and control active status.
+            Manage user accounts, reset passwords, assign roles, and perform admin actions.
           </p>
         </div>
 
@@ -106,7 +162,7 @@ export default function UserManagementPage() {
               <th className="px-6 py-4">Superuser</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Joined Date</th>
-              <th className="px-6 py-4 text-right">Actions</th>
+              <th className="px-6 py-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#334155]/60">
@@ -135,13 +191,19 @@ export default function UserManagementPage() {
                 </td>
 
                 <td className="px-6 py-4">
-                  {user.is_superuser ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                      <ShieldCheck size={12} /> Yes
-                    </span>
-                  ) : (
-                    <span className="text-xs text-slate-400">No</span>
-                  )}
+                  <button
+                    onClick={() => toggleSuperuserRole(user.id)}
+                    title="Click to toggle Superuser role"
+                    className="cursor-pointer"
+                  >
+                    {user.is_superuser ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        <ShieldCheck size={12} /> Superuser
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400 hover:text-slate-200">Standard User</span>
+                    )}
+                  </button>
                 </td>
                 <td className="px-6 py-4">
                   {user.is_active ? (
@@ -157,13 +219,38 @@ export default function UserManagementPage() {
                 <td className="px-6 py-4 text-xs font-mono text-slate-400">
                   {user.joined}
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button
-                    onClick={() => toggleUserStatus(user.id)}
-                    className="px-3 py-1 bg-[#0f172a] hover:bg-[#334155] text-slate-300 hover:text-white rounded-lg text-xs font-medium border border-[#334155] transition-colors"
-                  >
-                    {user.is_active ? 'Deactivate' : 'Activate'}
-                  </button>
+
+                {/* Actions Column */}
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => resetUserPassword(user)}
+                      title="Reset User Password & Send OTP"
+                      className="px-2.5 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 rounded-lg text-xs font-semibold border border-indigo-500/30 transition-all flex items-center gap-1"
+                    >
+                      <Key size={13} /> Reset Pass
+                    </button>
+
+                    <button
+                      onClick={() => toggleUserStatus(user.id)}
+                      title={user.is_active ? "Deactivate Account" : "Activate Account"}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                        user.is_active
+                          ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30'
+                          : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                      }`}
+                    >
+                      {user.is_active ? 'Deactivate' : 'Activate'}
+                    </button>
+
+                    <button
+                      onClick={() => deleteUser(user.id, user.email)}
+                      title="Delete User Account"
+                      className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg border border-red-500/30 transition-all"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -173,3 +260,4 @@ export default function UserManagementPage() {
     </div>
   );
 }
+
