@@ -3,9 +3,15 @@ import '@/styles/globals.css';
 import { AppProvider } from '@/providers/AppProvider';
 
 export const metadata = {
-  title: 'LeadPilot AI - Intelligent Sales Automation',
-  description: 'Discover, qualify, and convert leads with AI-powered multi-agent sales automation.',
+  title: 'LeadPilot AI - Intelligent Sales Automation Workspace',
+  description: 'Discover, qualify, and convert leads with AI-powered autonomous sales agents.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
+
 
 export default function RootLayout({
   children,

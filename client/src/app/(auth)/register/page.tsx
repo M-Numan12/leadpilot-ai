@@ -113,26 +113,23 @@ export default function RegisterPage() {
       >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '52px',
-              height: '52px',
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-              marginBottom: '16px',
-              fontSize: '24px',
-              fontWeight: 'bold',
-              boxShadow: '0 4px 16px rgba(79, 70, 229, 0.4)'
-            }}
-          >
-            ⚡
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+            <img
+              src="/logo.png"
+              alt="LeadPilot AI Logo"
+              style={{
+                width: '64px',
+                height: '64px',
+                objectFit: 'contain',
+                borderRadius: '16px',
+                boxShadow: '0 0 25px rgba(99, 102, 241, 0.5)'
+              }}
+            />
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 6px 0', letterSpacing: '-0.5px', color: '#ffffff' }}>
             {step === 1 ? 'Create New Account' : 'Verify Email OTP Code'}
           </h1>
+
           <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
             {step === 1
               ? 'Join LeadPilot AI and automate your sales pipeline'

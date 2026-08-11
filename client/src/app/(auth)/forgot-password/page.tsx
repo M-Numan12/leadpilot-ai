@@ -157,24 +157,23 @@ export default function ForgotPasswordPage() {
       >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '52px',
-              height: '52px',
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-              marginBottom: '16px',
-              boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4)'
-            }}
-          >
-            <Key size={26} style={{ color: '#ffffff' }} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+            <img
+              src="/logo.png"
+              alt="LeadPilot AI Logo"
+              style={{
+                width: '64px',
+                height: '64px',
+                objectFit: 'contain',
+                borderRadius: '16px',
+                boxShadow: '0 0 25px rgba(99, 102, 241, 0.5)'
+              }}
+            />
           </div>
           <h1 style={{ fontSize: '26px', fontWeight: '900', margin: '0 0 6px 0', color: '#ffffff' }}>
             {step === 1 ? 'Forgot Password?' : 'Enter OTP & New Password'}
           </h1>
+
           <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
             {step === 1
               ? 'Apna registered email address enter karein. System 6-digit OTP code aapke inbox mein bhejega.'

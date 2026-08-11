@@ -86,26 +86,24 @@ export default function LoginPage() {
       >
         {/* Top Logo & Branding */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '52px',
-              height: '52px',
-              borderRadius: '16px',
-              background: role === 'admin' ? 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' : 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-              marginBottom: '16px',
-              fontSize: '24px',
-              fontWeight: 'bold',
-              boxShadow: role === 'admin' ? '0 4px 16px rgba(245, 158, 11, 0.4)' : '0 4px 16px rgba(79, 70, 229, 0.4)'
-            }}
-          >
-            ⚡
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+            <img
+              src="/logo.png"
+              alt="LeadPilot AI Logo"
+              style={{
+                width: '64px',
+                height: '64px',
+                objectFit: 'contain',
+                borderRadius: '16px',
+                boxShadow: role === 'admin' ? '0 0 25px rgba(245, 158, 11, 0.5)' : '0 0 25px rgba(99, 102, 241, 0.5)',
+                transition: 'all 0.3s ease'
+              }}
+            />
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 6px 0', letterSpacing: '-0.5px', color: '#ffffff' }}>
             LeadPilot AI
           </h1>
+
           <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
             {role === 'admin' ? 'Super Administrator Portal & Operations' : 'Sales Automation & Prospecting Workspace'}
           </p>

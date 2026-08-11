@@ -129,23 +129,17 @@ export function Sidebar() {
         >
           {!collapsed ? (
             <Link href="/dashboard/overview" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-              <div
+              <img
+                src="/logo.png"
+                alt="LeadPilot AI Logo"
                 style={{
                   width: '38px',
                   height: '38px',
+                  objectFit: 'contain',
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  fontWeight: 'bold',
-                  fontSize: '18px',
-                  boxShadow: '0 4px 12px rgba(79, 70, 229, 0.4)'
+                  boxShadow: '0 0 15px rgba(99, 102, 241, 0.4)'
                 }}
-              >
-                ⚡
-              </div>
+              />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontWeight: '800', fontSize: '17px', color: '#ffffff', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   LeadPilot <span style={{ fontSize: '10px', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>AI</span>
@@ -155,24 +149,20 @@ export function Sidebar() {
             </Link>
           ) : (
             <Link href="/dashboard/overview" style={{ margin: '0 auto', textDecoration: 'none' }}>
-              <div
+              <img
+                src="/logo.png"
+                alt="LeadPilot AI Logo"
                 style={{
                   width: '38px',
                   height: '38px',
+                  objectFit: 'contain',
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  fontWeight: 'bold',
-                  fontSize: '18px'
+                  boxShadow: '0 0 15px rgba(99, 102, 241, 0.4)'
                 }}
-              >
-                ⚡
-              </div>
+              />
             </Link>
           )}
+
 
           <button
             onClick={() => setCollapsed(!collapsed)}
