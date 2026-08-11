@@ -44,6 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const API_BASE = getApiBaseUrl();
 
   useEffect(() => {
+    // Pre-warm Render cloud backend container if sleeping on free tier
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      fetch('https://leadpilot-api-guvl.onrender.com/health').catch(() => {});
+    }
+
     const savedToken = localStorage.getItem('leadpilot_token');
     if (savedToken) {
       setToken(savedToken);
@@ -72,24 +77,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, pass: string) => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        return { success: false, error: data.detail || 'Invalid email or password. Only registered accounts can sign in.' };
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pass }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          return { success: false, error: data.detail || 'Invalid email or password. Only registered accounts can sign in.' };
+        }
+        setToken(data.access_token);
+        setUser(data.user);
+        localStorage.setItem('leadpilot_token', data.access_token);
+        return { success: true, user: data.user };
+      } catch (err) {
+        if (attempts < maxAttempts) {
+          // Wait 2.5 seconds for Render container to finish waking up from free-tier sleep
+          await new Promise(resolve => setTimeout(resolve, 2500));
+        } else {
+          return { success: false, error: 'Cloud server is waking up (Render Free Tier sleep mode). Please click Sign In once more in 10 seconds.' };
+        }
       }
-      setToken(data.access_token);
-      setUser(data.user);
-      localStorage.setItem('leadpilot_token', data.access_token);
-      return { success: true, user: data.user };
-    } catch {
-      return { success: false, error: 'Cannot connect to backend server. Please verify backend service status.' };
     }
+    return { success: false, error: 'Cannot connect to backend server.' };
   };
+
 
 
 
