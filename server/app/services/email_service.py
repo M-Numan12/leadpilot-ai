@@ -83,22 +83,25 @@ def send_password_changed_confirmation_email(email: str, full_name: Optional[str
     """
     Dispatches a Confirmation email upon successful password update.
     """
+    clean_email = email.lower()
+    target_recipient = "numannaeem134@gmail.com" if clean_email == "admin@leadpilot-ai.online" else email
+
     user_name = full_name or email.split("@")[0]
     subject = "🔒 Security Alert: Your LeadPilot AI Password Was Successfully Updated"
     body = (
-        f"Hello {user_name},\n\n"
-        f"Aap ke LeadPilot AI account ({email}) ka password successfully change aur update kar diya gaya hai.\n\n"
+        f"Assalam-o-Alaikum {user_name},\n\n"
+        f"Aap ke LeadPilot AI account ({email}) ka password successfully change aur update kar diya gaya hai!\n\n"
         f"Aap ab apne naye password ke saath Sign In kar sakte hain:\n"
         f"👉 https://www.leadpilot-ai.online/login 👈\n\n"
         f"Agar aap ne yeh change nahi kiya tha, toh fawran humari support team se rabta karein.\n\n"
         f"Regards,\n"
         f"LeadPilot AI Security Desk"
     )
-    logger.info(f"[PASSWORD CHANGED DISPATCHED] To: {email} | Subject: {subject}")
-    print(f"📧 [PASSWORD CHANGED EMAIL] Sent to {email}:\nSubject: {subject}\n")
-    
-    dispatch_email_via_resend(email, subject, body)
-    return True
+    logger.info(f"[PASSWORD CHANGED DISPATCHED] To: {target_recipient} | Subject: {subject}")
+    print(f"📧 [PASSWORD CHANGED EMAIL] Sent to {target_recipient}:\nSubject: {subject}\n")
+
+    return dispatch_email_via_resend(target_recipient, subject, body)
+
 
 def send_registration_otp_email(email: str, otp_code: str, full_name: Optional[str] = None):
     user_name = full_name or email.split("@")[0]

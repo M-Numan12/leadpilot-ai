@@ -47,27 +47,36 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
-    const isAdmin = cleanEmail === 'admin@leadpilot-ai.online' || cleanEmail.includes('admin') || cleanEmail.includes('numan');
-    const targetEmailDisplay = isAdmin ? 'numannaeem134@gmail.com' : email;
+    const isAdmin = cleanEmail === 'admin@leadpilot-ai.online' || cleanEmail.includes('admin');
+    let targetEmailDisplay = isAdmin ? 'numannaeem134@gmail.com' : email;
 
-    // Dispatch request to cloud backend asynchronously
-    fetch(`${API_BASE}/auth/forgot-password/request`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail })
-    })
-      .then(res => res.json())
-      .then(data => {})
-      .catch(() => {});
-
-    // Generate local instant fallback 6-digit OTP
-    const localOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedFallbackOtp(localOtp);
+    try {
+      const res = await fetch(`${API_BASE}/auth/forgot-password/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail })
+      });
+      const data = await res.json();
+      if (res.ok && data.email) {
+        targetEmailDisplay = isAdmin ? 'numannaeem134@gmail.com' : data.email;
+      }
+    } catch {
+      // Retry once if backend container was cold starting
+      try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await fetch(`${API_BASE}/auth/forgot-password/request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail })
+        });
+      } catch {}
+    }
 
     setLoading(false);
-    setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${targetEmailDisplay}. Please check your email inbox.`);
+    setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${targetEmailDisplay}! Please check your email inbox (including Spam/Junk folder).`);
     setStep(2);
   };
+
 
   // STEP 2: Verify OTP and update new password
   const handleVerifyAndResetPassword = async (e: React.FormEvent) => {

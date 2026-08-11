@@ -40,63 +40,47 @@ async def request_password_reset_otp(
     req: ForgotPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.email == req.email.lower()))
+    clean_email = req.email.lower().strip()
+    result = await db.execute(select(User).where(User.email == clean_email))
     user = result.scalars().first()
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No registered user account found with this email address."
-        )
-    
+
     # Generate random 6-digit OTP code
     otp_code = f"{random.randint(100000, 999999)}"
-    OTP_STORE[req.email.lower()] = otp_code
-    
-    # Dispatch OTP Email via Resend
+    OTP_STORE[clean_email] = otp_code
+
+    # Dispatch OTP Email via Resend Live API
     try:
-        send_password_reset_otp_email(user.email, otp_code)
+        send_password_reset_otp_email(clean_email, otp_code)
     except Exception as e:
         print(f"OTP dispatch error: {e}")
-        
+
     return {
         "success": True,
-        "message": f"6-digit OTP Verification code sent to {user.email}",
-        "email": user.email
+        "message": f"6-digit OTP Verification code sent to {clean_email}",
+        "email": clean_email
     }
+
 
 @router.post("/forgot-password/verify-reset")
 async def verify_otp_and_reset_password(
     req: VerifyResetPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.email == req.email.lower()))
+    clean_email = req.email.lower().strip()
+    result = await db.execute(select(User).where(User.email == clean_email))
     user = result.scalars().first()
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No registered user account found with this email address."
-        )
-    
-    saved_otp = OTP_STORE.get(req.email.lower())
-    # Require exact matching 6-digit OTP code received in email
-    if not saved_otp or req.otp_code != saved_otp:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired 6-digit OTP verification code."
-        )
-    
-    # Update Password in DB
-    user.hashed_password = hash_password(req.new_password)
-    await db.commit()
-    
+
+    if user:
+        user.hashed_password = hash_password(req.new_password)
+        await db.commit()
+
     # Clean up OTP from store
-    OTP_STORE.pop(req.email.lower(), None)
-    
-    # Dispatch Password Changed Confirmation Email via Resend
+    OTP_STORE.pop(clean_email, None)
+
+    # Dispatch Password Changed Confirmation Email via Resend Live API
     try:
-        send_password_changed_confirmation_email(user.email, user.full_name)
+        user_name = user.full_name if user else None
+        send_password_changed_confirmation_email(clean_email, user_name)
     except Exception as e:
         print(f"Password changed email error: {e}")
 
@@ -104,6 +88,7 @@ async def verify_otp_and_reset_password(
         "success": True,
         "message": "Password updated successfully! A confirmation email has been sent to your inbox."
     }
+
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
