@@ -36,20 +36,23 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result.success) {
-      if (role === 'admin' || email.includes('admin') || email.includes('numan')) {
-        router.push('/admin');
+      const loggedUser = result.user;
+      const isAdminUser = loggedUser?.is_superuser || email.includes('admin') || email.includes('numan');
+
+      if (role === 'admin') {
+        if (isAdminUser) {
+          router.push('/admin');
+        } else {
+          setError('Access Denied: Only Administrator accounts can log in to the Admin Portal.');
+        }
       } else {
         router.push('/dashboard/overview');
       }
     } else {
-      if (role === 'admin' || email.includes('admin') || email.includes('numan')) {
-        router.push('/admin');
-      } else {
-        router.push('/dashboard/overview');
-      }
+      setError(result.error || 'Invalid email address or password. Only registered accounts can log in.');
     }
-
   };
+
 
   return (
     <div

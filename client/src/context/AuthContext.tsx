@@ -17,10 +17,11 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   register: (email: string, pass: string, fullName?: string, orgName?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -79,29 +80,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        return { success: false, error: data.detail || 'Login failed' };
+        return { success: false, error: data.detail || 'Invalid email or password. Only registered accounts can sign in.' };
       }
       setToken(data.access_token);
       setUser(data.user);
       localStorage.setItem('leadpilot_token', data.access_token);
-      return { success: true };
+      return { success: true, user: data.user };
     } catch {
-      // Fallback for live demo mode if backend is sleeping or spinning up
-      const mockUser: User = {
-        id: 'usr-admin-demo',
-        email: email,
-        full_name: email.split('@')[0],
-        is_active: true,
-        is_superuser: email.includes('admin') || email.includes('numan'),
-        is_unlimited_credits: true,
-        ai_credits: 'UNLIMITED'
-      };
-      setToken('mock_demo_jwt_token_2026');
-      setUser(mockUser);
-      localStorage.setItem('leadpilot_token', 'mock_demo_jwt_token_2026');
-      return { success: true };
+      return { success: false, error: 'Cannot connect to backend server. Please verify backend service status.' };
     }
   };
+
 
 
   const register = async (email: string, pass: string, fullName?: string, orgName?: string) => {
