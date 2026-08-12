@@ -49,9 +49,10 @@ export default function RegisterPage() {
       await fetch(`${API_BASE}/auth/register/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail })
+        body: JSON.stringify({ email: cleanEmail, full_name: fullName })
       });
     } catch {}
+
 
     setLoading(false);
     setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${cleanEmail}! Please check your email inbox (including Spam/Junk folder).`);

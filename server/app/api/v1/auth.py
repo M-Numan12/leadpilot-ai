@@ -90,9 +90,13 @@ async def verify_otp_and_reset_password(
     }
 
 
+class RegisterOtpRequest(BaseModel):
+    email: EmailStr
+    full_name: Optional[str] = None
+
 @router.post("/register/request-otp")
 async def request_registration_otp(
-    req: ForgotPasswordRequest,
+    req: RegisterOtpRequest,
     db: AsyncSession = Depends(get_db)
 ):
     clean_email = req.email.lower().strip()
@@ -107,9 +111,9 @@ async def request_registration_otp(
     otp_code = f"{random.randint(100000, 999999)}"
     OTP_STORE[f"reg_{clean_email}"] = otp_code
 
-    # Dispatch Registration OTP Email via Resend API
+    # Dispatch 6-Digit Registration Verification OTP Email directly to User Email via Resend API
     try:
-        send_registration_otp_email(clean_email, otp_code)
+        send_registration_otp_email(clean_email, otp_code, req.full_name)
     except Exception as e:
         print(f"Registration OTP dispatch error: {e}")
 
@@ -118,6 +122,7 @@ async def request_registration_otp(
         "message": f"6-digit OTP Verification code sent to {clean_email}",
         "email": clean_email
     }
+
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
