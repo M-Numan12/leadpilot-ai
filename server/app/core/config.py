@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     OPENAI_API_KEY: str = ""
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
-    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "LeadPilot AI Security <onboarding@resend.dev>")
+    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "LeadPilot AI Security <onboarding@leadpilot-ai.online>")
+
 
 
     class Config:
