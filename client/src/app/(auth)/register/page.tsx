@@ -60,9 +60,10 @@ export default function RegisterPage() {
     } catch {}
 
     setLoading(false);
-    setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${cleanEmail}! (Verification Code: ${localCode})`);
+    setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${cleanEmail}! Please check your email inbox (including Spam/Junk folder).`);
     setStep(2);
   };
+
 
 
   // STEP 2: Verify OTP and finalize Registration
