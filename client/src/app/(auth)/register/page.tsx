@@ -33,8 +33,6 @@ export default function RegisterPage() {
   };
   const API_BASE = getApiBaseUrl();
 
-  const [generatedOtp, setGeneratedOtp] = useState('');
-
   // STEP 1: Send Account Verification OTP
   const handleRequestRegistrationOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +44,6 @@ export default function RegisterPage() {
     setLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
-
-    // Generate local 6-digit OTP
-    const localCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(localCode);
 
     try {
       await fetch(`${API_BASE}/auth/register/request-otp`, {
@@ -63,6 +57,7 @@ export default function RegisterPage() {
     setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${cleanEmail}! Please check your email inbox (including Spam/Junk folder).`);
     setStep(2);
   };
+
 
 
 
