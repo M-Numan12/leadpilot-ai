@@ -225,7 +225,7 @@ export default function RegisterPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Muhammad Numan"
+                  placeholder="e.g. John Doe"
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 42px',
@@ -252,7 +252,7 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="numan@company.com"
+                  placeholder="name@company.com"
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 42px',
@@ -278,7 +278,8 @@ export default function RegisterPage() {
                   type="text"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="Acme Tech Solutions"
+                  placeholder="e.g. Acme Corp"
+
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 42px',
@@ -365,7 +366,8 @@ export default function RegisterPage() {
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="315904"
+                  placeholder="Enter 6-digit OTP code"
+
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 42px',

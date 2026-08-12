@@ -200,7 +200,8 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === 'admin' ? 'numan@leadpilot-ai.online' : 'you@company.com'}
+                placeholder={role === 'admin' ? 'admin@company.com' : 'you@company.com'}
+
                 style={{
                   width: '100%',
                   padding: '12px 16px 12px 42px',
