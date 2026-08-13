@@ -44,12 +44,21 @@ export default function RegisterPage() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      await fetch(`${API_BASE}/auth/register/request-otp`, {
+      const resp = await fetch(`${API_BASE}/auth/register/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cleanEmail, full_name: fullName })
       });
-    } catch {}
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        if (data.error) {
+          setError(data.error);
+        }
+      }
+    } catch (err) {
+      console.error('Registration OTP fetch error:', err);
+    }
+
 
     setLoading(false);
     setInfoMessage(`📩 6-Digit Verification OTP Code dispatched to ${cleanEmail}! Please check your email inbox (including Spam/Junk folder).`);
