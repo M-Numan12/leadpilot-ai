@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from pydantic import BaseModel, EmailStr
 from app.database.session import get_db
+
 from app.models.user import User
 from app.models.organization import Organization
 from app.models.membership import Membership
